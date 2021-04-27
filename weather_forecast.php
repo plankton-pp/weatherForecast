@@ -164,7 +164,6 @@
                         var province = response.WeatherForecasts[i].location.province;
                         var temperature_max = response.WeatherForecasts[i].forecasts[0].data.tc_max;
                         var temperature_min = response.WeatherForecasts[i].forecasts[0].data.tc_min;
-
                             data +="<td><div class=\"card\" id=\""+province+"\" onclick=\"callModal(this.id)\">"+         
                                         "<div class=\"imgcard\"><img src=\"imgs/"+icon+"\" style=\"width: 60%;\"></div><br />"+
                                         "<div class=\"container\">"+
@@ -189,8 +188,15 @@
             }
         });
     function callModal(id){
-        var backward = 0;      
-        getModalContent(id,backward);
+        if (typeof(Storage) !== "undefined") {
+          // Store
+          window.sessionStorage.setItem("id", id);
+        }
+        Modal(id);
+    }
+    function Modal(id){
+        let tmp = window.sessionStorage.getItem("id");  
+        getModalContent(id,0);
         var modalTag ="<!-- Modal -->"+
                         "<div class=\"modal fade\" id=\"exampleModal\" tabindex=\"-1\" role=\"dialog\" aria-labelledby=\"exampleModalLabel\" aria-hidden=\"true\">"+
                           "<div class=\"modal-dialog modal-lg\" role=\"document\">"+
@@ -202,6 +208,12 @@
                                 "</button></div>"+
                               "</div>"+
                               "<div class=\"modal-body\">"+
+                              "<div style=\"margin-left:2%\">"+
+                              "<button class=\"btn btn-secondary\" onclick=\"getModalContent(0,0);\"> ปัจจุบัน </button>&nbsp;&nbsp;"+
+                              "<button class=\"btn btn-secondary\" onclick=\"getModalContent(0,1);\"> 1 ชม.ที่แล้ว </button>&nbsp;&nbsp;"+
+                              "<button class=\"btn btn-secondary\" onclick=\"getModalContent(0,5);\"> 5 ชม.ที่แล้ว </button>&nbsp;&nbsp;"+
+                              "<button class=\"btn btn-secondary\" onclick=\"getModalContent(0,9);\"> 10 ชม.ที่แล้ว </button>&nbsp;&nbsp;"+
+                              "</div>"+
                                 "<div id=\"modalContent\">"+
                                     "<br />"+
                                         "<div class=\"text-center\" style=\"align:center\">"+
@@ -220,21 +232,52 @@
         $("#modal").html(modalTag);
         $("#exampleModal").modal('show');
     }
+
     function closeModal(){
         $("#exampleModal").modal('hide');   
     }
-    function getModalContent(province,backward_time){  
+    function getModalContent(province,backward_time){
+        modalContent = [];
+        addr_name = [];
+        if(province==0){
+            province = String(window.sessionStorage.getItem("id"));
+        }
+        alert("check: "+province);
         var current = new Date();
         var date = current.getDate();
-        var hour="";
-        if(current.getHours()<10){
-            hour ="0"+current.getHours();
+        var hour = "";
+        var time = "";
+        var place_url = "";
+        //retrieving backward data
+        if(backward_time!=0){
+            //set screen to loading
+            $('#modalContent').html(loading);
+            let diff = current.getHours()-backward_time;
+            if(diff<0){
+                //change date, time
+                date-=1;
+                hrs = 24+diff;
+                if(hrs<10){
+                    hour ="0"+hrs;
+                }else{
+                    hour = hrs;
+                }
+            }else{
+                //change only time
+                hour = diff;
+            }
+            time = hour + ":00" + ":00";
+            place_url = "https://data.tmd.go.th/nwpapi/v1/forecast/area/place?domain=2&province="+province+"&fields=tc,rh,cond&starttime=2021-04-"+date+"T"+time;
         }else{
-            hour = current.getHours();
+
+            if(current.getHours()<10){
+                hour ="0"+current.getHours();
+            }else{
+                hour = current.getHours();
+            }
+            time = hour + ":00" + ":00";
+            place_url = "https://data.tmd.go.th/nwpapi/v1/forecast/area/place?domain=2&province="+province+"&fields=tc,rh,cond&starttime=2021-04-"+date+"T"+time;
         }
-        var time = hour + ":00" + ":00";
-        starttime = "";
-        var place_url = "https://data.tmd.go.th/nwpapi/v1/forecast/area/place?domain=2&province="+province+"&fields=tc,rh,cond&starttime=2021-04-"+date+"T"+time;
         var settings = {
                     "async": true,
                     "crossDomain": true,
@@ -319,9 +362,9 @@
         var htmlString =""; 
         for(i=0;i<modalContent.length;i++){
             if(location[i]!="null"){
-                htmlString+="<tr><td><div class=\"imgcard\"><img src=\"imgs/"+icon[i]+"\" style=\"width: 30%;\"></div></td>"
+                htmlString+="<tr><td align=\"center\"><div><img src=\"imgs/"+icon[i]+"\" style=\"width: 30%;\"></div></td>"
                 htmlString+="<td>";
-                htmlString += "<h5>"+location[i]+"</h5>"+modalContent[i]+"<br /><br />";
+                htmlString += "<h5>"+location[i]+"</h5>"+modalContent[i]+"<br /><br /><hr>";
                 htmlString+="</td></tr>";
             }
         }
