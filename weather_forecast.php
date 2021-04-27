@@ -69,6 +69,7 @@
     //global var
         var dateTime_global=[];
         var addr_name =[];
+        var iconPack=[];
         var modalContent = [];
         var loading = "<br /><br /><br /><br /><br /><br /><br /><br />"+
                                     "<div class=\"text-center\" style=\"align:center\">"+
@@ -146,8 +147,8 @@
                             case 9:weather = "อากาศหนาวจัด";icon = "snow.png";break;
                             case 10:weather = "อากาศหนาว";icon = "snowflake.png";break;
                             case 11:weather = "อากาศเย็น";icon = "temperature.png";break;
-                            case 12:weather = "อากาศร้อนจัด";icon = "sun.png";break;
-                            default:break;
+                            default:weather = "อากาศร้อนจัด";icon = "sun.png";break;
+                            
                         }
                         var color = "";
                         switch(i%5){
@@ -191,6 +192,8 @@
         if (typeof(Storage) !== "undefined") {
           // Store
           window.sessionStorage.setItem("id", id);
+          window.sessionStorage.setItem("btn","block0");
+          window.sessionStorage.setItem("btn_val","ปัจจุบัน");
         }
         Modal(id);
     }
@@ -208,12 +211,12 @@
                                 "</button></div>"+
                               "</div>"+
                               "<div class=\"modal-body\">"+
-                              "<div style=\"margin-left:2%\">"+
-                              "<button class=\"btn btn-secondary\" onclick=\"getModalContent(0,0);\"> ปัจจุบัน </button>&nbsp;&nbsp;"+
-                              "<button class=\"btn btn-secondary\" onclick=\"getModalContent(0,1);\"> 1 ชม.ที่แล้ว </button>&nbsp;&nbsp;"+
-                              "<button class=\"btn btn-secondary\" onclick=\"getModalContent(0,5);\"> 5 ชม.ที่แล้ว </button>&nbsp;&nbsp;"+
-                              "<button class=\"btn btn-secondary\" onclick=\"getModalContent(0,9);\"> 10 ชม.ที่แล้ว </button>&nbsp;&nbsp;"+
-                              "</div>"+
+                              "<div style=\"margin-left:2%\" class=\"row\">"+
+                                  "<div id=\"block0\"><button class=\"btn btn-info\" id=\"backward0\" onclick=\"getModalContent(0,0);setColor(this.id,this.value);\"value=\"ปัจจุบัน\"> ปัจจุบัน </button></div>&nbsp;&nbsp;"+
+                                  "<div id=\"block1\"><button class=\"btn btn-secondary\" id=\"backward1\" onclick=\"getModalContent(0,1);setColor(this.id,this.value);\"value=\"1 ชม.ที่แล้ว\"> 1 ชม.ที่แล้ว </button></div>&nbsp;&nbsp;"+
+                                  "<div id=\"block5\"><button class=\"btn btn-secondary\" id=\"backward5\" onclick=\"getModalContent(0,5);setColor(this.id,this.value);\"value=\"5 ชม.ที่แล้ว\"> 5 ชม.ที่แล้ว </button></div>&nbsp;&nbsp;"+
+                                  "<div id=\"block10\"><button class=\"btn btn-secondary\" id=\"backward10\" onclick=\"getModalContent(0,10);setColor(this.id,this.value);\"value=\"10 ชม.ที่แล้ว\"> 10 ชม.ที่แล้ว </button></div>&nbsp;&nbsp;"+
+                              "</div><br /><hr><br />"+
                                 "<div id=\"modalContent\">"+
                                     "<br />"+
                                         "<div class=\"text-center\" style=\"align:center\">"+
@@ -237,8 +240,12 @@
         $("#exampleModal").modal('hide');   
     }
     function getModalContent(province,backward_time){
+        if(backward_time==10){
+            backward_time=9;
+        }
         modalContent = [];
         addr_name = [];
+        iconPack = [];
         if(province==0){
             province = String(window.sessionStorage.getItem("id"));
         }
@@ -263,7 +270,11 @@
                 }
             }else{
                 //change only time
-                hour = diff;
+                if(diff<10){
+                    hour ="0"+diff;
+                }else{
+                    hour = diff;
+                }
             }
             time = hour + ":00" + ":00";
             place_url = "https://data.tmd.go.th/nwpapi/v1/forecast/area/place?domain=2&province="+province+"&fields=tc,rh,cond&starttime=2021-04-"+date+"T"+time;
@@ -292,10 +303,10 @@
         $.ajax(settings).done(function(response){
             //set array empty
             addr_name=[];
+            iconPack=[];
             var str="";
             var weather="";
             var icon="";
-            var iconPack=[];
             //loop for get tmd information by area
             for(var i=0 ; i< response.WeatherForecasts.length ; i++){
                 lat = response.WeatherForecasts[i].location.lat;
@@ -316,18 +327,16 @@
                             case 9:weather = "อากาศหนาวจัด";icon = "snow.png";break;
                             case 10:weather = "อากาศหนาว";icon = "snowflake.png";break;
                             case 11:weather = "อากาศเย็น";icon = "temperature.png";break;
-                            case 12:weather = "อากาศร้อนจัด";icon = "sun.png";break;
-                            default:break;
+                            default:weather = "อากาศร้อนจัด";icon = "sun.png";break;
                         }
 
                 str = "พิกัด: "+lat+", "+lon;
                 str+= "<br />อุณหภูมิ: "+tc+" °C";
                 str+= "<br />ความชื้น: "+rh+"%";
                 str+= "<br />สภาพอากาศ: "+weather;
-                iconPack.push(icon);
 
                 //execute function to set global array variable
-                getLocName(lat,lon,str,iconPack);
+                getLocName(lat,lon,str,icon);
             }
         });
     }
@@ -361,10 +370,11 @@
     }
     function setModalContent(content,location,icon){
         modalContent.push(content);
+        iconPack.push(icon);
         var htmlString =""; 
         for(i=0;i<modalContent.length;i++){
             if(location[i]!="null"){
-                htmlString+="<tr><td align=\"center\"><div><img src=\"imgs/"+icon[i]+"\" style=\"width: 30%;\"></div></td>"
+                htmlString+="<tr><td align=\"center\"><div><img src=\"imgs/"+iconPack[i]+"\" style=\"width: 30%;\"></div></td>"
                 htmlString+="<td>";
                 htmlString += "<h5>"+location[i]+"</h5>"+modalContent[i]+"<br /><br /><hr>";
                 htmlString+="</td></tr>";
@@ -372,5 +382,18 @@
         }
         //set content to modal when the data retrieved
         $('#modalContent').html("<table>"+htmlString)+"</table>";
+    }
+    function setColor(btn_id,val){
+        var old_id = window.sessionStorage.getItem("btn");
+        var old_val = window.sessionStorage.getItem("btn_val");
+        var old_num = parseInt(old_id.substr(5,old_id.length));
+        //alert(btn_id+":"+old_id+":"+old_val+":"+old_num);
+        document.getElementById(old_id).innerHTML = "<button class=\"btn btn-secondary\" id=\"backward"+old_num+"\" onclick=\"getModalContent(0,"+old_num+");setColor(this.id,this.value);\"value=\""+old_val+"\">"+old_val+"</button>";
+
+        var btn_num = parseInt(btn_id.substr(8,btn_id.length));
+        document.getElementById("block"+btn_num).innerHTML = "<button class=\"btn btn-info\" id=\"backward"+btn_num+"\" onclick=\"getModalContent(0,"+btn_num+");setColor(this.id,this.value);\"value=\""+val+"\">"+val+"</button>";
+        window.sessionStorage.setItem("btn","block"+btn_num);
+        window.sessionStorage.setItem("btn_val",val);
+        
     }
     </script>
