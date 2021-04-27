@@ -242,7 +242,6 @@
         if(province==0){
             province = String(window.sessionStorage.getItem("id"));
         }
-        alert("check: "+province);
         var current = new Date();
         var date = current.getDate();
         var hour = "";
@@ -346,14 +345,17 @@
             try{
                 address = loc.results[last].plus_code.compound_code;
             }catch(err){
-                console.log("_error on line 300: try to search for loc_name");
+                console.log("(warning)_on line 300: try to search for loc_name in json results\n");
                 address = "null";
             }
             if(address!="null"){
-                address = address.substr(7,address.length);
+                try{
+                    address = address.substr(7,address.length);
+                }catch(err){
+                    console.log("(warning)_on line 300: try to search for loc_name in json results\n");
+                }
             }
             addr_name.push(address);
-            console.log(addr_name);
             setModalContent(str,addr_name,icon);
         });
     }
