@@ -66,7 +66,7 @@
     <div id="modal"></div>
 </body>
  <script>
-    //global var
+    //global var declation
         var dateTime_global=[];
         var addr_name =[];
         var iconPack=[];
@@ -77,8 +77,10 @@
                                         "<span class=\"sr-only\">Loading...</span>"+
                                       "</div>"+
                                     "</div>";
+    //Set onclick to get weather data as JSON form,source TMD.go.th API
         $("#btnGetData").click(function () {
 
+            //preparing resource for api (token, url,parameter)
             var region = $("#selectRegion").val();
             if(region == "null") {
                 alert("โปรดเลือกภูมิภาค");
@@ -96,7 +98,7 @@
                     }
                 }
 
-
+                //Send and get response via ajax
                 $.ajax(settings).done(function (response) {
                     var str = [];
                     var weather = "null";
@@ -117,6 +119,7 @@
                     var monthNameTH="";
                     var yearTH = parseInt(year)+543;
 
+                    //change month format
                     switch(month){
                         case "01":monthNameTH="มกราคม";break;
                         case "02":monthNameTH="กุมภาพันธ์";break;
@@ -133,6 +136,7 @@
                         default:break;
 
                     }
+                    //push weather information to array
                     str.push("<h3><b><br />ภาพรวมสภาพอากาศในแต่ละจังหวัด<br /><br />ประจำวันที่ : "+date+" "+monthNameTH+" "+yearTH+"</b></h3><br>==================================================<br><br>")
                     for(var i=0 ; i< response.WeatherForecasts.length ; i++) {
                         switch(response.WeatherForecasts[i].forecasts[0].data.cond){
@@ -150,6 +154,7 @@
                             default:weather = "อากาศร้อนจัด";icon = "sun.png";break;
                             
                         }
+                        //set color to card-footer
                         var color = "";
                         switch(i%5){
                             case 0:color="#F8B195";break;
@@ -162,6 +167,7 @@
                         if(i%5==0){
                             data += "<tr>";
                         }
+                        //apply weather information in array to UI (HTML form)
                         var province = response.WeatherForecasts[i].location.province;
                         var temperature_max = response.WeatherForecasts[i].forecasts[0].data.tc_max;
                         var temperature_min = response.WeatherForecasts[i].forecasts[0].data.tc_min;
@@ -180,26 +186,34 @@
                             data += "</tr>";
                         }
                     }
+                    //check refresh screen and update new weather information
                     if(data!=tempData){
                         str.push(data);
+                        //show on screen
                         $("#showData").html(str);
                         tempData = data;
                     }
                 });
             }
         });
+    //call modal to show more weather
+    //create session to save clicked btn and selected province
     function callModal(id){
         if (typeof(Storage) !== "undefined") {
-          // Store
+          // Store data to session
           window.sessionStorage.setItem("id", id);
           window.sessionStorage.setItem("btn","block0");
           window.sessionStorage.setItem("btn_val","ปัจจุบัน");
         }
+        //call modal and passing paramenter(province)
         Modal(id);
     }
     function Modal(id){
-        let tmp = window.sessionStorage.getItem("id");  
+        //specify province to call their weather
+        let tmp = window.sessionStorage.getItem("id");
+        //call weather data  
         getModalContent(id,0);
+        //preparing modal HTML tag
         var modalTag ="<!-- Modal -->"+
                         "<div class=\"modal fade\" id=\"exampleModal\" tabindex=\"-1\" role=\"dialog\" aria-labelledby=\"exampleModalLabel\" aria-hidden=\"true\">"+
                           "<div class=\"modal-dialog modal-lg\" role=\"document\">"+
@@ -232,14 +246,19 @@
                             "</div>"+
                           "</div>"+
                         "</div>";
+        //set modal to HTML div
         $("#modal").html(modalTag);
+        //call modal
         $("#exampleModal").modal('show');
     }
-
+    //close modal and destroy all session
     function closeModal(){
+        window.sessionStorage.clear();
         $("#exampleModal").modal('hide');   
     }
+    //get content to show on modal, specify on province and time
     function getModalContent(province,backward_time){
+        //check limit time to call backward data.
         if(backward_time==10){
             backward_time=9;
         }
@@ -298,7 +317,7 @@
                         "authorization": " Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImp0aSI6IjVkMTk0M2ZjODA3ODM4MDZiM2JhMzg0ODhlOGNkMTY4ZjYzMTBiN2Y2YzFkNDI5MWQ2ZmFhNTcwNDUwYTNiYTA0NzZiMGU2ODkyN2JlYWI4In0.eyJhdWQiOiIyIiwianRpIjoiNWQxOTQzZmM4MDc4MzgwNmIzYmEzODQ4OGU4Y2QxNjhmNjMxMGI3ZjZjMWQ0MjkxZDZmYWE1NzA0NTBhM2JhMDQ3NmIwZTY4OTI3YmVhYjgiLCJpYXQiOjE2MTkxNzAyOTAsIm5iZiI6MTYxOTE3MDI5MCwiZXhwIjoxNjUwNzA2MjkwLCJzdWIiOiIxNDEyIiwic2NvcGVzIjpbXX0.wSMbnRXc8baTLOuXw1bb15aF5wW00wxdUpmPQKIxPXu91TBmLsEN8C0EDm9Q6XJ_lNLwfKhIwGU887OLVKmfn4eHNV-bPnH1StAnK33B_50mhJEltR3xbXRY28GtWXbqPV59jvFQVsloe2Z5mS4U1GoxP3jyKKFDXPNHkmYsHKd3pmoTNswV39Ken2LvRGBWRsKJwwe0AtfPFuRVctWsHCraPFAcux7e8IAQD9v5U0iBBFDCtZfCA0QtmL_ttI4xrhQagRIptzMurxoXAI3wBAVSldh7Vfsoa-8V_id1BWCJ0TYHGZjmiHnLP_RjXUnl-mvn6uxXOPuL96ndH8RQbpaKHw2Lr50eHsEuCPY0yYbnUCVEhtrw0Coav14Sfj7XIl429E-FLcgSiOoM_uh6-h2LDbvLSOeNmGDmHrLp_Mt_TsZvZ56zHQPrvqqDyXAlqGqPY3uiJctO1s7vwM9zF5XIHRCEJ-HTSDI0dkjfGXxdeKMmLZKrAIkZ4t_VBldrFWAaf4W6KgGL08Wt_yAxrWcmh7JzO4WZ34AVuttMds9zEyAJPQgee8Qs_1UUla7JceV-HQl_nZ7GfG3PprBDkHxbl_rh8lN8CHcsSCKLoVF-yElCjIDEmgZiJwir50wtviVPvofue8xlJQRJrkRoIW8tyaBy5nCMST5Fcjs4GK8",
                     }
                 }
-
+        //get JSON data via ajax
         var lat,lon,tc,rh,cond,place;
         $.ajax(settings).done(function(response){
             //set array empty
@@ -307,7 +326,7 @@
             var str="";
             var weather="";
             var icon="";
-            //loop for get tmd information by area
+            //loop for get weather information by area
             for(var i=0 ; i< response.WeatherForecasts.length ; i++){
                 lat = response.WeatherForecasts[i].location.lat;
                 lon = response.WeatherForecasts[i].location.lon;
@@ -383,13 +402,16 @@
         //set content to modal when the data retrieved
         $('#modalContent').html("<table>"+htmlString)+"</table>";
     }
+    //set btn color clicked on modal, via session
     function setColor(btn_id,val){
+
+        //set default color to previous btn
         var old_id = window.sessionStorage.getItem("btn");
         var old_val = window.sessionStorage.getItem("btn_val");
         var old_num = parseInt(old_id.substr(5,old_id.length));
-        //alert(btn_id+":"+old_id+":"+old_val+":"+old_num);
         document.getElementById(old_id).innerHTML = "<button class=\"btn btn-secondary\" id=\"backward"+old_num+"\" onclick=\"getModalContent(0,"+old_num+");setColor(this.id,this.value);\"value=\""+old_val+"\">"+old_val+"</button>";
 
+        //set new color to onclick btn
         var btn_num = parseInt(btn_id.substr(8,btn_id.length));
         document.getElementById("block"+btn_num).innerHTML = "<button class=\"btn btn-info\" id=\"backward"+btn_num+"\" onclick=\"getModalContent(0,"+btn_num+");setColor(this.id,this.value);\"value=\""+val+"\">"+val+"</button>";
         window.sessionStorage.setItem("btn","block"+btn_num);
