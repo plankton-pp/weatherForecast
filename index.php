@@ -273,6 +273,9 @@
         var hour = "";
         var time = "";
         var place_url = "";
+        var str_date=date;
+        var month = current.getMonth() + 1;
+        var str_month = "";
         //retrieving backward data
         if(backward_time!=0){
             //set screen to loading
@@ -295,8 +298,16 @@
                     hour = diff;
                 }
             }
+
+            if(date<10){
+                str_date = "0"+date;
+            }
+            if(month<10){
+                str_month = "0"+month;
+            }
+
             time = hour + ":00" + ":00";
-            place_url = "https://data.tmd.go.th/nwpapi/v1/forecast/area/place?domain=2&province="+province+"&fields=tc,rh,cond&starttime=2021-04-"+date+"T"+time;
+            place_url = "https://data.tmd.go.th/nwpapi/v1/forecast/area/place?domain=2&province="+province+"&fields=tc,rh,cond&starttime=2021-"+str_month+"-"+str_date+"T"+time;
         }else{
 
             if(current.getHours()<10){
@@ -304,8 +315,16 @@
             }else{
                 hour = current.getHours();
             }
+
+            if(date<10){
+                str_date = "0"+date;
+            }
+            if(month<10){
+                str_month = "0"+month;
+            }
+
             time = hour + ":00" + ":00";
-            place_url = "https://data.tmd.go.th/nwpapi/v1/forecast/area/place?domain=2&province="+province+"&fields=tc,rh,cond&starttime=2021-04-"+date+"T"+time;
+            place_url = "https://data.tmd.go.th/nwpapi/v1/forecast/area/place?domain=2&province="+province+"&fields=tc,rh,cond&starttime=2021-"+str_month+"-"+str_date+"T"+time;
         }
         var settings = {
                     "async": true,
