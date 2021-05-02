@@ -392,7 +392,7 @@
             try{
                 address = loc.results[last].plus_code.compound_code;
             }catch(err){
-                console.log("(warning)_on line 300: try to search for loc_name in json results\n");
+                console.log("(warning)_on line 300: Loading data ...\n");
                 address = "null";
             }
             if(address!="null"){
@@ -419,7 +419,11 @@
             }
         }
         //set content to modal when the data retrieved
-        $('#modalContent').html("<table>"+htmlString)+"</table>";
+        try{
+            $('#modalContent').html("<table>"+htmlString)+"</table>";
+        }catch(err){
+            console.log("warning on line 425: Loading IMG ...");
+        }
     }
     //set btn color clicked on modal, via session
     function setColor(btn_id,val){
